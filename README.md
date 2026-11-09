@@ -36,6 +36,17 @@ npm run dev
 O app abre em `http://localhost:5173`.
 O Supabase Studio fica em `http://localhost:54323`.
 
+## MCP Server + Inspector
+
+O servidor (`apps/mcp-server`) usa transporte STDIO e, por ora, expõe uma única tool mockada (`list_review_rules`). Não precisa de Supabase nem de `.env`.
+
+```bash
+# Compila e abre o MCP Inspector (UI web) já apontando para o servidor
+npm -w apps/mcp-server run inspector
+```
+
+O Inspector 2.x imprime no terminal a URL com token (UI em `http://127.0.0.1:6274`). Na aba *Servers* conecte `devreview` e use a aba *Tools*. Para testar validação, use "Edit as JSON" com `{"category":"foo"}`.
+
 ## Estrutura
 
 ```

@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "inspector": "npm run build && mcp-inspector --web --config mcp.inspector.json --server devreview"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
@@ -17,6 +17,8 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@modelcontextprotocol/inspector": "2.12.0",
+    "@supabase/mcp-server-supabase": "0.16.1",
     "@types/node": "^22.15.3",
     "typescript": "^5.6.3"
   }
