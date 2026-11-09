@@ -7,3 +7,6 @@ build/
 docs/
 .supabase/
 *.tsbuildinfo
+
+# Configuração local de MCP (por desenvolvedor)
+.mcp.json
