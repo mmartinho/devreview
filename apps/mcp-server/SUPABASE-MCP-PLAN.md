@@ -57,9 +57,59 @@ Projeto criado em supabase.com: `https://ehbblydlzvamhttsjlxx.supabase.co` (proj
 - `read_only=true`: padrão seguro, conforme a recomendação da Supabase. Isso **bloqueia** `apply_migration` e `execute_sql` de escrita; para criar o schema/seed na nuvem, será preciso trocar para `read_only=false` temporariamente, ou aplicar as migrations por outro caminho (`supabase db push`).
 - `features`: só `database`, `debugging`, `development` e `docs`.
 - Autenticação: OAuth no navegador, em `/mcp` → *supabase-devreview-cloud* → *Authenticate*; escolher a organização que contém o projeto. Nenhuma chave vai para o arquivo (a publishable key é do frontend, não do MCP).
-- O banco da nuvem está **vazio** até aplicarmos `supabase/migrations/00001_init_schema.sql` e `supabase/seed.sql`.
+- A migration `supabase/migrations/00001_init_schema.sql` e o `supabase/seed.sql` já foram aplicados no projeto da nuvem (conferido: 1 time, 8 regras, 7 ativas, 6 reviews, 5 ADRs).
 
-## 5. Riscos e observações
+## 5. Modelo de dados (schema `public`)
+
+Derivado de `supabase/migrations/00001_init_schema.sql`. Todas as tabelas filhas pertencem a um time (`team_id`) e são removidas em cascata (`on delete cascade`).
+
+```mermaid
+erDiagram
+    teams ||--o{ review_rules : "possui"
+    teams ||--o{ review_history : "possui"
+    teams ||--o{ adrs : "possui"
+
+    teams {
+        uuid id PK "default gen_random_uuid()"
+        text name "not null"
+        timestamptz created_at "default now()"
+    }
+
+    review_rules {
+        uuid id PK "default gen_random_uuid()"
+        uuid team_id FK "not null"
+        text category "style | architecture | security | performance"
+        text rule "not null"
+        text severity "error | warning | info"
+        boolean active "default true"
+        timestamptz created_at "default now()"
+    }
+
+    review_history {
+        uuid id PK "default gen_random_uuid()"
+        uuid team_id FK "not null"
+        text pr_url "not null"
+        int pr_number "not null"
+        text repo "not null"
+        text review_summary
+        int issues_found "default 0"
+        timestamptz reviewed_at "default now()"
+    }
+
+    adrs {
+        uuid id PK "default gen_random_uuid()"
+        uuid team_id FK "not null"
+        text title "not null"
+        text context "not null"
+        text decision "not null"
+        text status "proposed | accepted | deprecated"
+        timestamptz created_at "default now()"
+    }
+```
+
+Observação de segurança: nas 4 tabelas da nuvem o **RLS está desligado e não há policies** (verificado em 2026-11-09). A decisão sobre isso foi adiada para as próximas aulas do curso.
+
+## 6. Riscos e observações
 
 - O servidor local tem **menos tools** que o hosted; a lista exata deve ser conferida ao conectar.
 - O `.mcp.json` não aceita comentários; as justificativas ficam aqui.
