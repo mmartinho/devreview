@@ -13,3 +13,6 @@ supabase/.branches/
 
 # Configuração local de MCP (por desenvolvedor)
 .mcp.json
+
+# Configuração local do editor (por desenvolvedor)
+.vscode/

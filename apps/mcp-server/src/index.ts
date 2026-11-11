@@ -2,7 +2,7 @@
 /**
  * Autor(es): Marcus Martinho <marcus.antonio.martinho.silva@gmail.com>
  * Data Criação: 2026-11-09
- * Data Atualização: 2026-11-09
+ * Data Atualização: 2026-11-11
  * Descrição: Entrypoint do DevReview MCP Server em estado mínimo. Cria um McpServer conectado
  * por STDIO e registra uma única tool mockada, `list_review_rules`, com entrada validada por Zod.
  *
@@ -34,7 +34,8 @@ function createServer(): McpServer {
       title: "Listar regras de review",
       description: "Lista as regras de code review do time (dados mockados).",
       inputSchema: {
-        category: z.enum(RULE_CATEGORIES).optional().describe("Filtra por categoria"),
+        // nullish(): o Inspector envia `null` (não omite o campo) ao limpar o select.
+        category: z.enum(RULE_CATEGORIES).nullish().describe("Filtra por categoria"),
         only_active: z.boolean().default(true).describe("Retorna apenas regras ativas"),
       },
     },

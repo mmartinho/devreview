@@ -33,7 +33,9 @@ O PRD do mcp-server assumia o pacote `@supabase/mcp-server-supabase` via STDIO c
 - Sem segredos no arquivo: o endpoint local não usa credencial, então o `.mcp.json` pode ser versionado.
 - O Claude Code pede aprovação na primeira vez que carrega servidores de `.mcp.json` de projeto.
 
-## 3. Passos de implementação
+**Status do servidor local (atualizado em 2026-11-10):** `supabase-devreview-local` fica no `.mcp.json` **apenas como registro**. O curso passou a usar o projeto na nuvem, então o Docker/Supabase local não é mais necessário e o servidor aparece com `ECONNREFUSED` quando está desligado. É esperado e inofensivo; se incomodar, desative-o em `/mcp` sem apagar a configuração.
+
+## 3. Passos de implementação (válidos para o servidor local, mantidos como registro)
 
 1. Ligar o Docker Desktop.
 2. `npx supabase start` e depois `npx supabase db reset` (já corrigimos o `[local_smtp]` no `config.toml`).
@@ -58,6 +60,28 @@ Projeto criado em supabase.com: `https://ehbblydlzvamhttsjlxx.supabase.co` (proj
 - `features`: só `database`, `debugging`, `development` e `docs`.
 - Autenticação: OAuth no navegador, em `/mcp` → *supabase-devreview-cloud* → *Authenticate*; escolher a organização que contém o projeto. Nenhuma chave vai para o arquivo (a publishable key é do frontend, não do MCP).
 - A migration `supabase/migrations/00001_init_schema.sql` e o `supabase/seed.sql` já foram aplicados no projeto da nuvem (conferido: 1 time, 8 regras, 7 ativas, 6 reviews, 5 ADRs).
+
+## 4.1 GitHub MCP (adicionado em 2026-11-10)
+
+Fonte: https://github.com/github/github-mcp-server. Terceiro servidor do `.mcp.json`, também com nome exclusivo (`github-devreview`), para não colidir com os servidores `github` que existem no escopo local de outros projetos (`code-connect`, `agentlens`). O escopo *user* do `~/.claude.json` está vazio.
+
+```json
+"github-devreview": {
+  "type": "http",
+  "url": "https://api.githubcopilot.com/mcp/",
+  "headers": {
+    "Authorization": "Bearer ${GITHUB_PAT}",
+    "X-MCP-Toolsets": "context,repos,issues,pull_requests",
+    "X-MCP-Readonly": "true"
+  }
+}
+```
+
+- **Servidor remoto HTTP**, sem Docker. Autenticação por PAT no header `Authorization`.
+- **Token fora do arquivo:** o valor vem da variável de ambiente do usuário `GITHUB_PAT` (o Claude Code não lê `.env`). Defini-la exige fechar e reabrir o Claude Code por inteiro.
+- **Menor privilégio:** o PAT fine-grained deve ser restrito ao repositório do projeto, com leitura de conteúdo, issues e pull requests. Como a variável `GITHUB_PAT` é compartilhada com outros projetos, um token exclusivo do `devreview` exigiria outro nome de variável (ex.: `GITHUB_PAT_DEVREVIEW`).
+- `X-MCP-Toolsets`: conjunto padrão do README sem `users`. `X-MCP-Readonly: true`: só tools de leitura; trocar para `false` se o curso pedir escrita (comentar em PR, criar issue).
+- **Validado em 2026-11-10:** teste de fumaça no Claude Code (terminal) com a tool `get_me`, que retornou os dados do usuário autenticado pelo `GITHUB_PAT`. Exige reabrir o Claude Code e aprovar o servidor de projeto; conferir com `claude mcp list` ou `/mcp`.
 
 ## 5. Modelo de dados (schema `public`)
 
@@ -115,4 +139,5 @@ Observação de segurança: nas 4 tabelas da nuvem o **RLS está desligado e nã
 - O `.mcp.json` não aceita comentários; as justificativas ficam aqui.
 - O `devreview-mcp` (nosso servidor STDIO) não foi colocado no `.mcp.json`: ele é objeto de estudo do curso e é aberto pelo Inspector. Pode ser adicionado depois se o curso pedir.
 - O pacote `@supabase/mcp-server-supabase` instalado como devDependency deixou de ser necessário para este fluxo; pode ser removido ou mantido para estudo.
-- Esta configuração **não foi testada**: o Docker/Supabase local está desligado.
+- O servidor **local** não foi testado (Docker/Supabase local desligado) e deixou de ser usado no curso. O **cloud** foi validado via OAuth; o **GitHub** foi validado com `get_me` (2026-11-10).
+- Há 3 servidores no `.mcp.json` (`supabase-devreview-local`, `supabase-devreview-cloud`, `github-devreview`); o `.mcp.json.example` é a cópia versionada, com placeholders.

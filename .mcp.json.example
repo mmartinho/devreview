@@ -7,6 +7,15 @@
     "supabase-devreview-cloud": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=<SEU_PROJECT_REF>&read_only=true&features=database,debugging,development,docs"
+    },
+    "github-devreview": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PAT}",
+        "X-MCP-Toolsets": "context,repos,issues,pull_requests",
+        "X-MCP-Readonly": "true"
+      }
     }
   }
 }
