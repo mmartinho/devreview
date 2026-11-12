@@ -2,7 +2,7 @@
   "mcpServers": {
     "devreview": {
       "command": "node",
-      "args": ["build/index.js"],
+      "args": ["--env-file=.env", "build/index.js"],
       "env": {}
     }
   }
