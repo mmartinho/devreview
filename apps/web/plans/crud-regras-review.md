@@ -1,7 +1,7 @@
 Autor(es): Marcus Martinho (marcus.antonio.martinho.silva@gmail.com), Claude Sonnet 5.5
 Data Criação: 2026-11-13
 Data Atualização: 2026-11-13
-Descrição: Plano de implementação do CRUD completo (criar, alterar, excluir) de "Regras de Review" no client web (`apps/web`, rota `/regras`), persistindo no Supabase. Documento apenas de planejamento — nada foi implementado.
+Descrição: Plano de implementação do CRUD completo (criar, alterar, excluir) de "Regras de Review" no client web (`apps/web`, rota `/regras`), persistindo no Supabase. Plano aprovado e já implementado; atualizado para refletir a troca do Select de Status por um toggle (Switch).
 
 # Plano: persistir criação, edição e exclusão de Regras de Review
 
@@ -34,7 +34,7 @@ A interface não tem `created_at`, embora `fetchRules` ordene por ele e a coluna
 |---|---|---|
 | RLS / segurança | **Fora do escopo.** Mantém tabelas sem RLS. Registrado como pendência (seção 7). | Resposta do usuário |
 | Exclusão | **Hard delete** com diálogo de confirmação. (Para "pausar" já existe o status Inativa.) | Padrão assumido — *confirmar* |
-| Status Ativa/Inativa | **Controle (Select/checkbox) "Status" no modal de edição**; novas regras nascem ativas. | Padrão assumido — *confirmar* |
+| Status Ativa/Inativa | **Toggle (switch) "Status" no modal de edição**; novas regras nascem ativas. (Inicialmente planejado como Select; trocado por toggle para alternar com um clique — melhoria de UX pedida em 2026-11-13.) | Usuário |
 | Estado/UI | Seguir o padrão existente: Redux Toolkit (`createAsyncThunk`) + componentes `ui/*` (shadcn) já presentes. Sem novas dependências. | Convenção do projeto |
 
 > Os dois itens "assumido" não foram respondidos; se discordar, só a seção 3.4 / 3.5 muda.
@@ -86,7 +86,9 @@ O **fechamento do modal só ocorre após o `fulfilled`** (via `await dispatch(..
 
 ### 3.4 `src/pages/RulesPage.tsx` — alterar (status)
 - Adicionar `formActive` (`useState<boolean>(true)`), preenchido em `handleOpenEdit` com `rule.active` e resetado para `true` em `handleOpenNew`.
-- Adicionar no modal um `Select` "Status" (Ativa/Inativa) — visível **apenas na edição** (na criação a regra nasce ativa). Sem novo componente: reutilizar `Select` existente.
+- Adicionar no modal um **toggle (`Switch`)** "Status" — visível **apenas na edição** (na criação a regra nasce ativa). Alterna com um clique (ou Espaço/Enter); o valor só é gravado ao clicar em **Salvar**.
+  - Novo componente `src/components/ui/switch.tsx`: `<button role="switch" aria-checked>` nativo, **sem nova dependência** (não usa `@radix-ui/react-switch`). Props: `checked`, `onCheckedChange`.
+  - Visual: trilho verde quando Ativa, cinza quando Inativa; rótulo "Status: Ativa/Inativa" ao lado muda junto (cor verde/cinza). Associado ao rótulo via `aria-labelledby`.
 - `updateRule` envia `rule`, `category`, `severity`, `active`.
 
 ### 3.5 `src/pages/RulesPage.tsx` — excluir
@@ -115,7 +117,7 @@ Não há testes automatizados no `apps/web` (sem runner configurado); a verifica
    - **Criar**: preencher descrição + categoria + severidade → Salvar → regra aparece no topo da lista, modal fecha, contador sobe.
    - **Persistência**: conferir via Supabase (`select * from review_rules order by created_at desc limit 3;`) e recarregar a página (F5) → regra continua.
    - **Validação**: descrição vazia → Salvar desabilitado/mensagem; não chama a rede.
-   - **Editar**: alterar descrição/categoria/severidade/status → Salvar → linha atualizada e badge de status correto; conferir no banco.
+   - **Editar**: alterar descrição/categoria/severidade e alternar o toggle de status (um clique) → Salvar → linha atualizada e badge de status correto; conferir no banco.
    - **Excluir**: lixeira → confirmar → some da lista e do banco; Cancelar não altera nada.
    - **Erro**: simular falha (ex.: URL do Supabase inválida / offline) → modal permanece aberto com a mensagem; nada é fechado nem perdido.
    - **Filtros**: criar regra de categoria X com filtro em Y ativo → não aparece até limpar o filtro (comportamento esperado; considerar aviso no futuro).
@@ -140,5 +142,6 @@ Não há testes automatizados no `apps/web` (sem runner configurado); a verifica
 |---|---|
 | `apps/web/src/types/index.ts` | `created_at?`, `RuleInput` |
 | `apps/web/src/store/slices/rulesSlice.ts` | thunks `createRule/updateRule/deleteRule`, estado e reducers |
-| `apps/web/src/pages/RulesPage.tsx` | `handleSave`, validação, status no modal, botão/diálogo de exclusão, a11y |
+| `apps/web/src/pages/RulesPage.tsx` | `handleSave`, validação, toggle de status no modal, botão/diálogo de exclusão, a11y |
+| `apps/web/src/components/ui/switch.tsx` | **Novo**: componente Switch (toggle) acessível, sem dependências |
 | Banco / migrations | **nenhuma alteração** |

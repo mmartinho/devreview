@@ -3,7 +3,7 @@
  * Data Criação: 2026-11-09
  * Data Atualização: 2026-11-13
  * Descrição: Página "Regras de Review" (rota /regras). Lista as regras do time com filtros por
- * categoria e severidade e permite criar, editar (inclui status Ativa/Inativa) e excluir regras,
+ * categoria e severidade e permite criar, editar (status Ativa/Inativa via toggle) e excluir regras,
  * persistindo no Supabase via thunks do `rulesSlice`.
  *
  * O modal de criação/edição só fecha após o sucesso da operação; em caso de erro a mensagem é
@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchRules,
@@ -370,20 +371,20 @@ export function RulesPage() {
             </div>
 
             {editingRule && (
-              <div className="space-y-1.5">
-                <Label className="text-gray-300">Status</Label>
-                <Select
-                  value={formActive ? "active" : "inactive"}
-                  onValueChange={(v) => setFormActive(v === "active")}
-                >
-                  <SelectTrigger className="border-gray-700 bg-gray-800 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="border-gray-700 bg-gray-900">
-                    <SelectItem value="active">Ativa</SelectItem>
-                    <SelectItem value="inactive">Inativa</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center justify-between rounded-md border border-gray-700 bg-gray-800 px-3 py-2.5">
+                <Label id="rule-active-label" className="text-gray-300">
+                  Status:{" "}
+                  <span
+                    className={formActive ? "text-green-400" : "text-gray-400"}
+                  >
+                    {formActive ? "Ativa" : "Inativa"}
+                  </span>
+                </Label>
+                <Switch
+                  aria-labelledby="rule-active-label"
+                  checked={formActive}
+                  onCheckedChange={setFormActive}
+                />
               </div>
             )}
 
