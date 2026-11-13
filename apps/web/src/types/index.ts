@@ -44,12 +44,30 @@ export interface ReviewHistory {
 
 export interface Adr {
   id: string;
+  team_id: string;
   title: string;
   context: string;
   decision: string;
   status: AdrStatus;
   created_at: string;
 }
+
+/** Time (contexto de dados: regras, ADRs e histórico pertencem a um time). */
+export interface Team {
+  id: string;
+  name: string;
+  created_at?: string;
+}
+
+/** Time com a contagem de registros associados (listagem em /times). */
+export interface TeamWithCounts extends Team {
+  rules_count: number;
+  adrs_count: number;
+  reviews_count: number;
+}
+
+/** Dados editáveis de um time (entrada do formulário de criação/edição). */
+export type TeamInput = Pick<Team, "name">;
 
 /** Dados editáveis de uma ADR (entrada do formulário de criação/edição). */
 export type AdrInput = Pick<Adr, "title" | "context" | "decision" | "status">;

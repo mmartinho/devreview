@@ -10,6 +10,7 @@
  */
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { getSupabase } from "@/lib/supabase";
+import { deleteTeam } from "./teamsSlice";
 import { Adr, AdrInput, AdrStatus } from "@/types";
 
 /**
@@ -108,6 +109,8 @@ export const deleteAdr = createAsyncThunk(
 );
 
 interface AdrsState {
+  /** Time dono dos `items` atuais (descarta respostas obsoletas ao trocar de time). */
+  teamId: string | null;
   items: Adr[];
   fetchError: string | null;
   loading: boolean;
@@ -121,6 +124,7 @@ interface AdrsState {
 }
 
 const initialState: AdrsState = {
+  teamId: null,
   items: [],
   fetchError: null,
   loading: false,
@@ -156,22 +160,38 @@ const adrsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAdrs.pending, (state) => {
+      .addCase(fetchAdrs.pending, (state, action) => {
+        // Mudou de time: descarta a lista anterior para não exibir dados do time errado.
+        if (state.teamId !== action.meta.arg) state.items = [];
+        state.teamId = action.meta.arg;
         state.loading = true;
         state.fetchError = null;
       })
       .addCase(fetchAdrs.fulfilled, (state, action) => {
+        // Resposta de um time que já não é o atual: ignora.
+        if (action.meta.arg !== state.teamId) return;
         state.items = action.payload;
         state.loading = false;
         state.fetchError = null;
       })
+      .addCase(deleteTeam.fulfilled, (state, action) => {
+        // O time exibido foi excluído (o banco apagou seus dados em cascata): limpa a lista.
+        if (state.teamId === action.payload) {
+          state.items = [];
+          state.teamId = null;
+        }
+      })
       .addCase(fetchAdrs.rejected, (state, action) => {
+        if (action.meta.arg !== state.teamId) return;
         state.loading = false;
         state.fetchError =
           action.error.message ?? "Não foi possível carregar as ADRs.";
       })
       .addCase(createAdr.fulfilled, (state, action) => {
-        state.items.unshift(action.payload);
+        // Só insere se a lista exibida ainda é a do time em que a regra/ADR foi criada.
+        if (action.payload.team_id === state.teamId) {
+          state.items.unshift(action.payload);
+        }
       })
       .addCase(updateAdr.fulfilled, (state, action) => {
         const i = state.items.findIndex((a) => a.id === action.payload.id);

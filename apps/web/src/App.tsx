@@ -4,6 +4,7 @@ import { DashboardPage } from "@/pages/DashboardPage";
 import { RulesPage } from "@/pages/RulesPage";
 import { HistoryPage } from "@/pages/HistoryPage";
 import { AdrsPage } from "@/pages/AdrsPage";
+import { TeamsPage } from "@/pages/TeamsPage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/regras" element={<RulesPage />} />
           <Route path="/historico" element={<HistoryPage />} />
           <Route path="/adrs" element={<AdrsPage />} />
+          <Route path="/times" element={<TeamsPage />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>

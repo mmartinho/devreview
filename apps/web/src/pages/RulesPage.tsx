@@ -53,7 +53,8 @@ import {
   deleteRule,
   clearMutationError,
 } from "@/store/slices/rulesSlice";
-import { TEAM_ID } from "@/lib/team";
+import { Link } from "react-router-dom";
+import { selectCurrentTeamId } from "@/store/slices/teamsSlice";
 import { ReviewRule, RuleCategory, RuleSeverity } from "@/types";
 
 /** Tamanho máximo aceito para a descrição de uma regra. */
@@ -61,6 +62,8 @@ const MAX_RULE_LENGTH = 500;
 
 export function RulesPage() {
   const dispatch = useAppDispatch();
+  const teamId = useAppSelector(selectCurrentTeamId);
+  const teamsLoading = useAppSelector((s) => s.teams.loading);
   const {
     items: rules,
     categoryFilter,
@@ -82,8 +85,11 @@ export function RulesPage() {
   const canSave = trimmedRule.length > 0 && !ruleTooLong && !saving;
 
   useEffect(() => {
-    dispatch(fetchRules(TEAM_ID));
-  }, [dispatch]);
+    if (teamId) dispatch(fetchRules(teamId));
+    // Trocou de time: fecha modais/diálogos para nunca gravar no time errado.
+    dispatch(closeModal());
+    setRuleToDelete(null);
+  }, [dispatch, teamId]);
 
   const editingRule = editingRuleId
     ? rules.find((r) => r.id === editingRuleId)
@@ -119,7 +125,7 @@ export function RulesPage() {
    */
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSave) return;
+    if (!canSave || !teamId) return;
     const input = {
       rule: trimmedRule,
       category: formCategory,
@@ -130,7 +136,7 @@ export function RulesPage() {
       if (editingRuleId) {
         await dispatch(updateRule({ id: editingRuleId, input })).unwrap();
       } else {
-        await dispatch(createRule({ teamId: TEAM_ID, input })).unwrap();
+        await dispatch(createRule({ teamId, input })).unwrap();
       }
       dispatch(closeModal());
     } catch {
@@ -172,6 +178,7 @@ export function RulesPage() {
             size="sm"
             className="gap-2 bg-indigo-600 hover:bg-indigo-500"
             onClick={handleOpenNew}
+            disabled={!teamId}
           >
             <Plus className="h-4 w-4" />
             Nova Regra
@@ -180,6 +187,15 @@ export function RulesPage() {
       />
 
       <div className="flex-1 space-y-4 p-6">
+        {!teamId && !teamsLoading && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            Nenhum time selecionado.{" "}
+            <Link to="/times" className="font-medium text-indigo-300 underline hover:text-indigo-200">
+              Crie ou escolha um time
+            </Link>{" "}
+            para ver e cadastrar dados.
+          </div>
+        )}
         {/* Filters */}
         <div className="flex items-center gap-3">
           <Select

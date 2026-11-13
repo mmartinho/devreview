@@ -8,7 +8,8 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchRules } from "@/store/slices/rulesSlice";
 import { fetchHistory } from "@/store/slices/historySlice";
 import { fetchAdrs } from "@/store/slices/adrsSlice";
-import { TEAM_ID } from "@/lib/team";
+import { Link } from "react-router-dom";
+import { selectCurrentTeamId } from "@/store/slices/teamsSlice";
 
 function issueSeverity(issues: number): "error" | "warning" | "info" {
   if (issues >= 4) return "error";
@@ -18,15 +19,18 @@ function issueSeverity(issues: number): "error" | "warning" | "info" {
 
 export function DashboardPage() {
   const dispatch = useAppDispatch();
+  const teamId = useAppSelector(selectCurrentTeamId);
+  const teamsLoading = useAppSelector((s) => s.teams.loading);
   const rules = useAppSelector((s) => s.rules.items);
   const history = useAppSelector((s) => s.history.items);
   const adrs = useAppSelector((s) => s.adrs.items);
 
   useEffect(() => {
-    dispatch(fetchRules(TEAM_ID));
-    dispatch(fetchHistory(TEAM_ID));
-    dispatch(fetchAdrs(TEAM_ID));
-  }, [dispatch]);
+    if (!teamId) return;
+    dispatch(fetchRules(teamId));
+    dispatch(fetchHistory(teamId));
+    dispatch(fetchAdrs(teamId));
+  }, [dispatch, teamId]);
 
   const activeRules = rules.filter((r) => r.active).length;
   const totalIssues = history.reduce((acc, r) => acc + r.issues_found, 0);
@@ -43,6 +47,15 @@ export function DashboardPage() {
       <Header title="Início" />
 
       <div className="flex-1 space-y-6 p-6">
+        {!teamId && !teamsLoading && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            Nenhum time selecionado.{" "}
+            <Link to="/times" className="font-medium text-indigo-300 underline hover:text-indigo-200">
+              Crie ou escolha um time
+            </Link>{" "}
+            para ver e cadastrar dados.
+          </div>
+        )}
         {/* Stat Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard

@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/table";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchHistory, setRepoFilter } from "@/store/slices/historySlice";
-import { TEAM_ID } from "@/lib/team";
+import { Link } from "react-router-dom";
+import { selectCurrentTeamId } from "@/store/slices/teamsSlice";
 import { RuleSeverity } from "@/types";
 
 function issueSeverity(issues: number): RuleSeverity {
@@ -32,11 +33,13 @@ function formatDate(iso: string): string {
 
 export function HistoryPage() {
   const dispatch = useAppDispatch();
+  const teamId = useAppSelector(selectCurrentTeamId);
+  const teamsLoading = useAppSelector((s) => s.teams.loading);
   const { items: history, repoFilter } = useAppSelector((s) => s.history);
 
   useEffect(() => {
-    dispatch(fetchHistory(TEAM_ID));
-  }, [dispatch]);
+    if (teamId) dispatch(fetchHistory(teamId));
+  }, [dispatch, teamId]);
 
   const filtered = history.filter(
     (r) =>
@@ -53,6 +56,15 @@ export function HistoryPage() {
       <Header title="Histórico de Reviews" />
 
       <div className="flex-1 space-y-4 p-6">
+        {!teamId && !teamsLoading && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            Nenhum time selecionado.{" "}
+            <Link to="/times" className="font-medium text-indigo-300 underline hover:text-indigo-200">
+              Crie ou escolha um time
+            </Link>{" "}
+            para ver e cadastrar dados.
+          </div>
+        )}
         {/* Metrics */}
         <div className="grid grid-cols-3 gap-4">
           <div className="rounded-lg border border-gray-800 bg-gray-900 px-4 py-3">

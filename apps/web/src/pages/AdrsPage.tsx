@@ -43,7 +43,8 @@ import {
   deleteAdr,
   clearMutationError,
 } from "@/store/slices/adrsSlice";
-import { TEAM_ID } from "@/lib/team";
+import { Link } from "react-router-dom";
+import { selectCurrentTeamId } from "@/store/slices/teamsSlice";
 import { Adr, AdrStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -94,6 +95,8 @@ const tabItems: { value: AdrStatus | "all"; label: string }[] = [
 
 export function AdrsPage() {
   const dispatch = useAppDispatch();
+  const teamId = useAppSelector(selectCurrentTeamId);
+  const teamsLoading = useAppSelector((s) => s.teams.loading);
   const {
     items: adrs,
     statusFilter,
@@ -125,8 +128,11 @@ export function AdrsPage() {
     !saving;
 
   useEffect(() => {
-    dispatch(fetchAdrs(TEAM_ID));
-  }, [dispatch]);
+    if (teamId) dispatch(fetchAdrs(teamId));
+    // Trocou de time: fecha modais/diálogos para nunca gravar no time errado.
+    dispatch(closeModal());
+    setAdrToDelete(null);
+  }, [dispatch, teamId]);
 
   const filtered =
     statusFilter === "all"
@@ -164,13 +170,13 @@ export function AdrsPage() {
    */
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSave) return;
+    if (!canSave || !teamId) return;
     const input = { title, context, decision, status: formStatus };
     try {
       if (editingAdrId) {
         await dispatch(updateAdr({ id: editingAdrId, input })).unwrap();
       } else {
-        await dispatch(createAdr({ teamId: TEAM_ID, input })).unwrap();
+        await dispatch(createAdr({ teamId, input })).unwrap();
       }
       dispatch(closeModal());
     } catch {
@@ -204,6 +210,7 @@ export function AdrsPage() {
             size="sm"
             className="gap-2 bg-indigo-600 hover:bg-indigo-500"
             onClick={handleOpenNew}
+            disabled={!teamId}
           >
             <Plus className="h-4 w-4" />
             Nova ADR
@@ -212,6 +219,15 @@ export function AdrsPage() {
       />
 
       <div className="flex-1 space-y-5 p-6">
+        {!teamId && !teamsLoading && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            Nenhum time selecionado.{" "}
+            <Link to="/times" className="font-medium text-indigo-300 underline hover:text-indigo-200">
+              Crie ou escolha um time
+            </Link>{" "}
+            para ver e cadastrar dados.
+          </div>
+        )}
         {/* Tabs filter */}
         <Tabs
           value={statusFilter}

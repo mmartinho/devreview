@@ -6,7 +6,8 @@ export function DataSourceBanner() {
   const rulesErr = useAppSelector((s) => s.rules.fetchError);
   const historyErr = useAppSelector((s) => s.history.fetchError);
   const adrsErr = useAppSelector((s) => s.adrs.fetchError);
-  const fetchError = rulesErr ?? historyErr ?? adrsErr;
+  const teamsErr = useAppSelector((s) => s.teams.fetchError);
+  const fetchError = teamsErr ?? rulesErr ?? historyErr ?? adrsErr;
 
   if (!isSupabaseConfigured) {
     return (

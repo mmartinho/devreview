@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, ListChecks, History, BookOpen, GitPullRequest } from "lucide-react";
+import { LayoutDashboard, ListChecks, History, BookOpen, GitPullRequest, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { to: "/regras", label: "Regras de Review", icon: ListChecks, end: false },
   { to: "/historico", label: "Histórico", icon: History, end: false },
   { to: "/adrs", label: "ADRs", icon: BookOpen, end: false },
+  { to: "/times", label: "Times", icon: Users, end: false },
 ];
 
 export function Sidebar() {
