@@ -1,3 +1,13 @@
+/**
+ * Autor(es): Marcus Martinho (marcus.antonio.martinho.silva@gmail.com), Claude Sonnet 5.5
+ * Data Criação: 2026-11-09
+ * Data Atualização: 2026-11-13
+ * Descrição: Tipos compartilhados do client web do DevReview (regras de review, histórico de
+ * reviews e ADRs), espelhando as tabelas do Supabase.
+ *
+ * Inclui também tipos auxiliares usados nos formulários, como `RuleInput`.
+ */
+
 export type RuleSeverity = "error" | "warning" | "info";
 export type RuleCategory =
   | "style"
@@ -13,7 +23,14 @@ export interface ReviewRule {
   rule: string;
   severity: RuleSeverity;
   active: boolean;
+  created_at?: string;
 }
+
+/** Dados editáveis de uma regra (entrada do formulário de criação/edição). */
+export type RuleInput = Pick<
+  ReviewRule,
+  "rule" | "category" | "severity" | "active"
+>;
 
 export interface ReviewHistory {
   id: string;
