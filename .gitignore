@@ -16,3 +16,6 @@ supabase/.branches/
 
 # Configuração local do editor (por desenvolvedor)
 .vscode/
+
+# Prints de tela usados como referência (local)
+imagens/
