@@ -50,3 +50,6 @@ export interface Adr {
   status: AdrStatus;
   created_at: string;
 }
+
+/** Dados editáveis de uma ADR (entrada do formulário de criação/edição). */
+export type AdrInput = Pick<Adr, "title" | "context" | "decision" | "status">;
