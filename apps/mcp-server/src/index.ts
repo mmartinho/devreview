@@ -4,7 +4,7 @@
  * Data Criação: 2026-11-09
  * Data Atualização: 2026-11-16
  * Descrição: Entrypoint do DevReview MCP Server. Cria um McpServer conectado
- * por STDIO e registra 3 tools e o prompt
+ * por STDIO e registra 4 tools (3 de leitura e save_review_history, de escrita) e o prompt
  * "secure_code_review". Os tool results saem em envelope de dados não confiáveis (anti prompt injection).
  *
  * Em STDIO o stdout pertence ao protocolo: todo log deve ir para stderr (console.error).
@@ -14,6 +14,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerReviewRulesTools } from "./tools/review-rules.js"
 import { registerAdrTools } from "./tools/adrs.js"
+import { registerReviewHistoryTools } from "./tools/review-history.js";
 import { registerMetricsTools } from './tools/metrics.js';
 import { registerSecurePrompts, SERVER_INSTRUCTIONS } from "./prompts/secure-review.js";
 
@@ -31,6 +32,7 @@ const server = new McpServer(
 registerReviewRulesTools(server);
 registerAdrTools(server);
 registerMetricsTools(server);
+registerReviewHistoryTools(server);
 registerSecurePrompts(server);
 
 const transport = new StdioServerTransport();

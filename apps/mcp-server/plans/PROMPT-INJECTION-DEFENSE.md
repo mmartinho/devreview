@@ -185,6 +185,8 @@ Não há framework de testes no projeto (PRD: "testes automatizados fora de esco
 - **Causa-raiz paralela, fora do escopo:** RLS desligado permite gravar conteúdo malicioso. Recomenda-se tratar à parte (policies por `team_id`/autenticação), pois reduz a fonte do vetor nº 1.
 - **Diff/GitHub não passam pelo servidor:** só as camadas A e B os cobrem.
 
+> Atualização 2026-11-16: o servidor passou a ter uma tool de escrita (`save_review_history`); ver `SAVE-REVIEW-HISTORY-TOOL.md`.
+
 ## 8. Decisões do usuário (resolvidas em 2026-11-16)
 
 1. **Formato das respostas:** aceita a mudança. Os tool results passam a usar o envelope (`_security_notice`, `source`, `data`, `suspicious_fields`). Confirmar na execução que não há consumidor do formato antigo.

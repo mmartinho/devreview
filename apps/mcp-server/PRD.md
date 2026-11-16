@@ -46,7 +46,7 @@ Entregar o **menor MCP server que sobe de verdade** e deixar o **MCP Inspector t
 - Autenticação, deploy, testes automatizados, CI, Docker.
 - Alterações em `apps/web`, `supabase/` ou migrations.
 - Mais de **uma** tool, resources ou prompts (podem ser acrescentados depois, quando formos explorar esses conceitos).
-  - *Atualização 2026-11-16:* o servidor já tem 3 tools e o prompt `secure_code_review` (camadas anti prompt injection). Ver `plans/PROMPT-INJECTION-DEFENSE.md`.
+  - *Atualização 2026-11-16:* o servidor já tem 4 tools (3 de leitura e `save_review_history`, de escrita) e o prompt `secure_code_review` (camadas anti prompt injection). Ver `plans/PROMPT-INJECTION-DEFENSE.md`.
 
 ## 4. Requisitos funcionais
 

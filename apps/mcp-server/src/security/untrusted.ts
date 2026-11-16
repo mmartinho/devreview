@@ -99,10 +99,11 @@ function walk(value: unknown, path: string, found: SuspiciousField[]): unknown {
  *
  * @param {string} source - Origem lógica dos dados (ex.: "adrs", "review_rules").
  * @param {unknown} payload - Dados originais da tool (formato anterior ao envelope).
+ * @param {SuspiciousField[]} [extraSuspicious=[]] - Suspeitas já detectadas pela tool (ex.: na entrada gravada).
  * @returns {{ content: { type: "text"; text: string }[] }} Resultado pronto para retornar do handler.
  */
-export function wrapUntrusted(source: string, payload: unknown) {
-  const suspicious_fields: SuspiciousField[] = [];
+export function wrapUntrusted(source: string, payload: unknown, extraSuspicious: SuspiciousField[] = []) {
+  const suspicious_fields: SuspiciousField[] = [...extraSuspicious];
   const data = walk(payload, "", suspicious_fields);
 
   return {
